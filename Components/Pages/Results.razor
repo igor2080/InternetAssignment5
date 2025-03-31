@@ -2,9 +2,75 @@
 @using ExcelDataReader
 @using System.Data
 @rendermode InteractiveServer
+@inject IJSRuntime JS
+
 
 <PageTitle>Results</PageTitle>
 
-@code {
+<canvas id="ILN010Chart"></canvas>
+@* <canvas id="IZI041Chart"></canvas> *@
 
+@code {
+    public required DataTable ILN010;
+    public required DataTable IZI041;
+
+    public required string[] ILN010labels;//years
+    public required string[] IZI041labels;//years
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var ILN010filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "ILN010_20250331-153606.xlsx");
+            var IZI041filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "IZI041_20250320-133102.xlsx");
+
+            using (var reader = ExcelReaderFactory.CreateReader(new FileStream(ILN010filePath, FileMode.Open)))
+            {
+                ILN010 = reader.AsDataSet().Tables[0];
+            }
+            using (var reader = ExcelReaderFactory.CreateReader(new FileStream(IZI041filePath, FileMode.Open)))
+            {
+                IZI041 = reader.AsDataSet().Tables[0];
+            }
+
+            ILN010labels = ILN010.Rows.Cast<DataRow>().Select(row => row[0]?.ToString() ?? string.Empty).Skip(1).ToArray();
+            IZI041labels = Array.ConvertAll(IZI041.Rows[0].ItemArray[3..17], x => x!.ToString()!);
+
+            int[] data1 = ILN010.Rows.Cast<DataRow>().Select(row => Convert.ToInt32(row[1])).Skip(1).ToArray();
+            int[] data2 = ILN010.Rows.Cast<DataRow>().Select(row => Convert.ToInt32(row[2])).Skip(1).ToArray();
+            int[] data3 = ILN010.Rows.Cast<DataRow>().Select(row => Convert.ToInt32(row[3])).Skip(1).ToArray();
+
+            var ILN010chartData = new
+            {
+                labels = ILN010labels,
+                datasets = new[]
+                    {
+                    new
+                    {
+                        label = "Laulību skaits",
+                        data = data1,
+                        borderColor = "blue",
+                        backgroundColor = "rgba(0,0,255,0.2)",
+                        fill = true
+                    },
+                    new
+                    {
+                        label = "Šķirto laulību skaits",
+                        data = data2,
+                        borderColor = "green",
+                        backgroundColor = "rgba(0,255,0,0.2)",
+                        fill = true
+                    }
+                }
+            };
+
+            await JS.InvokeVoidAsync("createChart", "ILN010Chart", ILN010chartData);
+        }
+    }
 }
