@@ -1,0 +1,88 @@
+﻿@page "/"
+@using ExcelDataReader
+@using System.Data
+@rendermode InteractiveServer
+
+<PageTitle>Home</PageTitle>
+
+
+<div>
+    <input id="all_checkbox" type="checkbox" checked="@all" @oninput="()=>{all=!all;}"> <label for="all_checkbox">All</label>
+    <input id="men_checkbox" type="checkbox" checked="@men" @oninput="()=>{men=!men;}" /> <label for="men_checkbox">Men</label>
+    <input id="women_checkbox" type="checkbox" checked="@women" @oninput="()=>{women=!women;}"> <label for="women_checkbox">Women</label>
+</div>
+
+<table class="table table-striped">
+    <tr>
+        <th></th>
+        <th></th>
+        <th></th>
+        @for (int i = 3; i < 17; i++)
+        {
+            <th>
+                @data1.Rows[0][i]
+            </th>
+        }
+    </tr>
+    @if (all)
+    {
+        @for (int i = 0; i < 9; i++)
+        {
+            <tr>
+                @for (int j = 0; j < 17; j++)
+                {
+                    <td>
+                        @data1.Rows[i][j]
+                    </td>
+                }
+            </tr>
+        }
+    }
+    @if (men)
+    {
+        @for (int i = 10; i < 19; i++)
+        {
+            <tr>
+                @for (int j = 0; j < 17; j++)
+                {
+                    <td>
+                        @data1.Rows[i][j]
+                    </td>
+                }
+            </tr>
+        }
+    }
+    @if (women)
+    {
+        @for (int i = 19; i < 28; i++)
+        {
+            <tr>
+                @for (int j = 0; j < 17; j++)
+                {
+                    <td>
+                        @data1.Rows[i][j]
+                    </td>
+                }
+            </tr>
+        }
+    }
+</table>
+
+@code {
+    DataTable data1;
+    bool all = true, men = true, women = true;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "IZI041_20250320-133102.xlsx");
+        using var reader = ExcelReaderFactory.CreateReader(new FileStream(filePath, FileMode.Open));
+        data1 = reader.AsDataSet().Tables[0];
+        await base.OnInitializedAsync();
+    }
+
+    private void toggleAll()
+    {
+        all = !all;
+    }
+}

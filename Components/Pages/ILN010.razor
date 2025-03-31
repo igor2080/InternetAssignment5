@@ -1,0 +1,84 @@
+﻿@page "/ILN010"
+@using ExcelDataReader
+@using System.Data
+@rendermode InteractiveServer
+
+<PageTitle>ILN010</PageTitle>
+
+
+<div>
+    <input id="marriages_checkbox" type="checkbox" checked="@marriages" @oninput="()=>{marriages=!marriages;}"> <label for="marriages_checkbox">Marriages</label>
+    <input id="divorces_checkbox" type="checkbox" checked="@divorces" @oninput="()=>{divorces=!divorces;}" /> <label for="divorces_checkbox">Divorces</label>
+    <input id="averages_checkbox" type="checkbox" checked="@averages" @oninput="()=>{averages=!averages;}"> <label for="averages_checkbox">Average</label>
+</div>
+
+<table class="table table-striped">
+    <tr>
+        <th>
+            @data1.Rows[0][0]
+        </th>
+        @if (marriages)
+        {
+            <th>
+                @data1.Rows[0][1]
+            </th>
+        }
+
+        @if (divorces)
+        {
+            <th>
+                @data1.Rows[0][2]
+            </th>
+        }
+        @if (averages)
+        {
+            <th>
+                @data1.Rows[0][3]
+            </th>
+        }
+    </tr>
+
+    @for (int i = 1; i < data1.Rows.Count; i++)
+    {
+        <tr>
+            <td>
+                @data1.Rows[i][0]
+            </td>
+
+            @if (marriages)
+            {
+                <td>
+                    @data1.Rows[i][1]
+                </td>
+            }
+
+            @if (divorces)
+            {
+                <td>
+                    @data1.Rows[i][2]
+                </td>
+            }
+            @if (averages)
+            {
+                <td>
+                    @data1.Rows[i][3]
+                </td>
+            }
+        </tr>
+    }
+
+</table>
+
+@code {
+    DataTable data1;
+    bool marriages = true, divorces = true, averages = true;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "ILN010_20250331-153606.xlsx");
+        using var reader = ExcelReaderFactory.CreateReader(new FileStream(filePath, FileMode.Open));
+        data1 = reader.AsDataSet().Tables[0];
+        await base.OnInitializedAsync();
+    }
+}
