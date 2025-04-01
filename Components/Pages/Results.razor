@@ -8,7 +8,7 @@
 <PageTitle>Results</PageTitle>
 
 <canvas id="ILN010Chart"></canvas>
-@* <canvas id="IZI041Chart"></canvas> *@
+<canvas id="IZI041Chart"></canvas>
 
 @code {
     public required DataTable ILN010;
@@ -21,6 +21,23 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+    }
+
+    private List<(string BorderColor, string BackgroundColor)> GenerateColors()
+    {
+        // 27 distinct colors
+        string[] baseColors = new string[]
+        {
+            "rgb(255, 99, 132)", "rgb(54, 162, 235)", "rgb(255, 206, 86)", "rgb(75, 192, 192)",
+            "rgb(153, 102, 255)", "rgb(255, 159, 64)", "rgb(233, 30, 99)", "rgb(33, 150, 243)",
+            "rgb(0, 188, 212)", "rgb(139, 195, 74)", "rgb(205, 220, 57)", "rgb(255, 87, 34)",
+            "rgb(121, 85, 72)", "rgb(96, 125, 139)", "rgb(41, 182, 246)", "rgb(255, 238, 88)",
+            "rgb(126, 87, 194)", "rgb(255, 61, 0)", "rgb(0, 200, 83)", "rgb(255, 234, 0)",
+            "rgb(244, 67, 54)", "rgb(0, 176, 255)", "rgb(165, 214, 167)", "rgb(66, 165, 245)",
+            "rgb(156, 39, 176)", "rgb(240, 98, 146)", "rgb(192, 202, 51)"
+        };
+
+        return baseColors.Select(c => (c, c.Replace("rgb", "rgba").Replace(")", ",0.2)"))).ToList();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -42,9 +59,9 @@
             ILN010labels = ILN010.Rows.Cast<DataRow>().Select(row => row[0]?.ToString() ?? string.Empty).Skip(1).ToArray();
             IZI041labels = Array.ConvertAll(IZI041.Rows[0].ItemArray[3..17], x => x!.ToString()!);
 
-            int[] data1 = ILN010.Rows.Cast<DataRow>().Select(row => Convert.ToInt32(row[1])).Skip(1).ToArray();
-            int[] data2 = ILN010.Rows.Cast<DataRow>().Select(row => Convert.ToInt32(row[2])).Skip(1).ToArray();
-            int[] data3 = ILN010.Rows.Cast<DataRow>().Select(row => Convert.ToInt32(row[3])).Skip(1).ToArray();
+            int[] data1 = ILN010.Rows.Cast<DataRow>().Select(x => Convert.ToInt32(x[1])).Skip(1).ToArray();
+            int[] data2 = ILN010.Rows.Cast<DataRow>().Select(x => Convert.ToInt32(x[2])).Skip(1).ToArray();
+            int[] data3 = ILN010.Rows.Cast<DataRow>().Select(x => Convert.ToInt32(x[3])).Skip(1).ToArray();
 
             var ILN010chartData = new
             {
@@ -70,7 +87,29 @@
                 }
             };
 
+
+            var colors = GenerateColors();
+            string[] labels = IZI041.Rows.Cast<DataRow>().Skip(1).Select(x => $"{x.ItemArray[0]!.ToString()} {x.ItemArray[1]!.ToString()} {x.ItemArray[2]!.ToString()}").ToArray();
+            var datasetList = IZI041.Rows.Cast<DataRow>().Skip(1).Select(x => x.ItemArray[3..17]).Select(x => x.Select(y => Convert.ToDouble(y)).ToArray()).ToArray();
+
+
+            List<dynamic> datasets = new List<dynamic>();
+            for (int i = 0; i < 27; i++)
+            {
+                datasets.Add(new
+                {
+                    label = labels[i],
+                    data = datasetList[i],
+                    BorderColor = colors[i].BorderColor,
+                    BackgroundColor = colors[i].BackgroundColor,
+                    fill = false
+                });
+            }
+
+            var IZI041chartData = new { labels = IZI041labels, datasets = datasets };
+
             await JS.InvokeVoidAsync("createChart", "ILN010Chart", ILN010chartData);
+            await JS.InvokeVoidAsync("createChart", "IZI041Chart", IZI041chartData);
         }
     }
 }
