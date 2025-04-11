@@ -10,6 +10,9 @@
     <input id="all_checkbox" type="checkbox" checked="@all" @oninput="()=>{all=!all;}"> <label for="all_checkbox">All</label>
     <input id="men_checkbox" type="checkbox" checked="@men" @oninput="()=>{men=!men;}" /> <label for="men_checkbox">Men</label>
     <input id="women_checkbox" type="checkbox" checked="@women" @oninput="()=>{women=!women;}"> <label for="women_checkbox">Women</label>
+    <input id="latvija_checkbox" type="checkbox" checked="@latvija" @oninput="()=>{latvija=!latvija;}"> <label for="latvija_checkbox">LATVIJA</label>
+    <input id="pilsetas_checkbox" type="checkbox" checked="@pilsetas" @oninput="()=>{pilsetas=!pilsetas;}"> <label for="pilsetas_checkbox">pilsētas</label>
+    <input id="teritorijas_checkbox" type="checkbox" checked="@teritorijas" @oninput="()=>{teritorijas=!teritorijas;}"> <label for="teritorijas_checkbox">lauku teritorijas</label>
 </div>
 
 <table class="table table-striped">
@@ -28,6 +31,12 @@
     {
         @for (int i = 0; i < 9; i++)
         {
+            if (latvija == false && data1.Rows[i][1].ToString()!.ToLower().Contains("latvija"))
+                continue;
+            if (pilsetas == false && data1.Rows[i][1].ToString()!.ToLower().Contains("pils"))
+                continue;
+            if (teritorijas == false && data1.Rows[i][1].ToString()!.ToLower().Contains("teritorijas"))
+                continue;
             <tr>
                 @for (int j = 0; j < 17; j++)
                 {
@@ -42,6 +51,12 @@
     {
         @for (int i = 10; i < 19; i++)
         {
+            if (latvija == false && data1.Rows[i][1].ToString()!.ToLower().Contains("latvija"))
+                continue;
+            if (pilsetas == false && data1.Rows[i][1].ToString()!.ToLower().Contains("pils"))
+                continue;
+            if (teritorijas == false && data1.Rows[i][1].ToString()!.ToLower().Contains("teritorijas"))
+                continue;
             <tr>
                 @for (int j = 0; j < 17; j++)
                 {
@@ -56,6 +71,12 @@
     {
         @for (int i = 19; i < 28; i++)
         {
+            if (latvija == false && data1.Rows[i][1].ToString()!.ToLower().Contains("latvija"))
+                continue;
+            if (pilsetas == false && data1.Rows[i][1].ToString()!.ToLower().Contains("pils"))
+                continue;
+            if (teritorijas == false && data1.Rows[i][1].ToString()!.ToLower().Contains("teritorijas"))
+                continue;
             <tr>
                 @for (int j = 0; j < 17; j++)
                 {
@@ -71,6 +92,8 @@
 @code {
     public required DataTable data1;
     bool all = true, men = true, women = true;
+    bool latvija = true, pilsetas = true, teritorijas = true;
+
 
 
     protected override async Task OnInitializedAsync()
